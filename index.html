@@ -286,18 +286,26 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    // Verificar se o usuário existe no banco de dados
+    // Buscar o usuário no banco de dados
     const { data: user, error } = await supabase
         .from('users')
-        .select('*')
+        .select('id, username, encrypted_password, type')
         .eq('username', username)
-        .eq('password', password)
-        .single();
+        .single(); // Usamos 'single()' para garantir que retornamos apenas 1 usuário
 
-    if (user) {
+    if (error) {
+        alert('Erro ao buscar usuário: ' + error.message);
+        return;
+    }
+
+    // Verificar se o usuário existe e se a senha fornecida corresponde à senha armazenada
+    const isPasswordCorrect = await verifyPassword(password, user.encrypted_password);
+
+    if (isPasswordCorrect) {
+        // Login bem-sucedido
         currentUser = user;
         loginScreen.classList.add('hidden');
-        
+
         if (user.type === 'admin') {
             adminDashboard.classList.remove('hidden');
             loadAdminDashboard();
@@ -309,6 +317,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         alert('Usuário ou senha incorretos!');
     }
 });
+
+// Função para verificar a senha usando a função `crypt` do PostgreSQL
+async function verifyPassword(plainPassword, encryptedPassword) {
+    // No Supabase, a verificação da senha criptografada é feita comparando diretamente com o hash
+    const { data, error } = await supabase
+        .rpc('verify_password', { password: plainPassword, encrypted_password: encryptedPassword });
+    return data.is_valid; // Esperamos que a função 'verify_password' retorne um booleano
+}
+
 
 // Logout
 logoutBtn.addEventListener('click', function() {
