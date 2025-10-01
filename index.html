@@ -185,34 +185,46 @@
         const createUserModal = document.getElementById('createUserModal');
         const cancelCreateUser = document.getElementById('cancelCreateUser');
 
-        // Sistema de autenticação
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+       // Configuração do Supabase
+const supabase = createClient('https://<your-project-url>.supabase.co', '<your-public-anon-key>');
 
-            const { data, error } = await supabase
-                .from('admin')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .single();
+// Função de Login
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();  // Impede o comportamento padrão do formulário (recarga da página)
 
-            if (error) {
-                alert('Usuário ou senha incorretos!');
-            } else {
-                currentUser = data;
-                loginScreen.classList.add('hidden');
-                
-                if (currentUser.username === 'admin') {
-                    adminDashboard.classList.remove('hidden');
-                    loadAdminDashboard();
-                } else {
-                    clientDashboard.classList.remove('hidden');
-                    loadClientDashboard();
-                }
-            }
-        });
+    const username = document.getElementById('username').value;  // Email do usuário
+    const password = document.getElementById('password').value;  // Senha
+
+    // Autenticação com Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: username,  // Usando email para login
+        password: password,
+    });
+
+    if (error) {
+        alert('Erro de autenticação: ' + error.message);  // Exibe um erro caso não consiga autenticar
+    } else {
+        // Usuário autenticado com sucesso
+        currentUser = data.user;
+        console.log('Usuário autenticado com UID:', currentUser.id);
+
+        // Verificando se o usuário é o admin
+        const isAdmin = currentUser.email === 'admin@example.com';  // Defina o email do admin
+
+        if (isAdmin) {
+            // Exibir painel do Admin
+            adminDashboard.classList.remove('hidden');
+            loadAdminDashboard();  // Função para carregar o painel do Admin
+        } else {
+            // Exibir painel do Cliente
+            clientDashboard.classList.remove('hidden');
+            loadClientDashboard();  // Função para carregar o painel do Cliente
+        }
+
+        loginScreen.classList.add('hidden');  // Esconde a tela de login
+    }
+});
+
 
         // Funções para Admin Dashboard
         async function loadAdminDashboard() {
