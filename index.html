@@ -12,7 +12,6 @@
             box-sizing: border-box;
         }
 
-        /* Animações suaves para transições */
         .fade-in {
             animation: fadeIn 0.3s ease-in;
         }
@@ -22,7 +21,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Estilo para modo escuro */
         .dark-mode {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: #e2e8f0;
@@ -35,6 +33,7 @@
     </style>
 </head>
 <body class="min-h-screen transition-all duration-300 dark-mode">
+    <!-- Header com logo e controles -->
     <header class="bg-gray-800 shadow-lg p-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div>
@@ -64,7 +63,7 @@
 
             <form id="loginForm" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Usuário</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Usuário (Email)</label>
                     <input type="text" id="username" required 
                         class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                 </div>
@@ -85,7 +84,6 @@
     <!-- Dashboard Admin -->
     <div id="adminDashboard" class="hidden">
         <div class="max-w-7xl mx-auto p-6">
-            <!-- Estatísticas -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Chamados Abertos</h3>
@@ -100,8 +98,6 @@
                     <p id="usersCount" class="text-3xl font-bold text-purple-600">0</p>
                 </div>
             </div>
-
-            <!-- Ações Administrativas -->
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
                 <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Ações Administrativas</h3>
                 <div class="flex flex-wrap gap-4">
@@ -113,120 +109,65 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Lista de Chamados -->
+    <!-- Dashboard Cliente -->
+    <div id="clientDashboard" class="hidden">
+        <div class="max-w-4xl mx-auto p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Abrir Novo Chamado</h3>
+                <button id="newTicketBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
+                    + Novo Chamado
+                </button>
+            </div>
+
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">Gerenciar Chamados</h3>
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">Meus Chamados</h3>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Protocolo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Solicitante</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Descrição</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Data/Hora</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminTicketsList" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                    </table>
-                </div>
+                <div id="clientTicketsList" class="p-6"></div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Criar Usuário (Admin) -->
-    <div id="createUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Criar Novo Usuário</h3>
-            <form id="createUserForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nome de Usuário</label>
-                    <input type="text" id="newUsername" required 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Senha</label>
-                    <input type="password" id="newPassword" required 
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tipo de Usuário</label>
-                    <select id="userType" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                        <option value="client">Cliente</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                </div>
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors">
-                        Criar
-                    </button>
-                    <button type="button" id="cancelCreateUser" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded-lg transition-colors">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
+        // Supabase Configuração
         const supabase = createClient('https://wrwyxhjbpysathipjlvk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indyd3l4aGpicHlzYXRoaXBqbHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzUzMTMsImV4cCI6MjA3NDg1MTMxM30.XLTxlzVgKFR1n-Krd7v7QhX6-bA8tJz4DGGw0pBAiRg');
         let currentUser = null;
 
-        const loginScreen = document.getElementById('loginScreen');
-        const adminDashboard = document.getElementById('adminDashboard');
-        const clientDashboard = document.getElementById('clientDashboard');
-        const themeToggle = document.getElementById('themeToggle');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const createUserBtn = document.getElementById('createUserBtn');
-        const createUserModal = document.getElementById('createUserModal');
-        const cancelCreateUser = document.getElementById('cancelCreateUser');
+        // Função de Login
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;  // Email
+            const password = document.getElementById('password').value;  // Senha
 
-       // Configuração do Supabase
-const supabase = createClient('https://<your-project-url>.supabase.co', '<your-public-anon-key>');
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: username,
+                password: password,
+            });
 
-// Função de Login
-document.getElementById('loginForm').addEventListener('submit', async function (e) {
-    e.preventDefault();  // Impede o comportamento padrão do formulário (recarga da página)
+            if (error) {
+                alert('Erro de autenticação: ' + error.message);
+            } else {
+                currentUser = data.user;
 
-    const username = document.getElementById('username').value;  // Email do usuário
-    const password = document.getElementById('password').value;  // Senha
+                // Verificar se é admin
+                const isAdmin = currentUser.email === 'admin@example.com';  // Troque pelo email do admin
 
-    // Autenticação com Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: username,  // Usando email para login
-        password: password,
-    });
+                if (isAdmin) {
+                    adminDashboard.classList.remove('hidden');
+                    loadAdminDashboard();  // Função para carregar o painel admin
+                } else {
+                    clientDashboard.classList.remove('hidden');
+                    loadClientDashboard();  // Função para carregar o painel cliente
+                }
 
-    if (error) {
-        alert('Erro de autenticação: ' + error.message);  // Exibe um erro caso não consiga autenticar
-    } else {
-        // Usuário autenticado com sucesso
-        currentUser = data.user;
-        console.log('Usuário autenticado com UID:', currentUser.id);
+                loginScreen.classList.add('hidden');
+            }
+        });
 
-        // Verificando se o usuário é o admin
-        const isAdmin = currentUser.email === 'admin@example.com';  // Defina o email do admin
-
-        if (isAdmin) {
-            // Exibir painel do Admin
-            adminDashboard.classList.remove('hidden');
-            loadAdminDashboard();  // Função para carregar o painel do Admin
-        } else {
-            // Exibir painel do Cliente
-            clientDashboard.classList.remove('hidden');
-            loadClientDashboard();  // Função para carregar o painel do Cliente
-        }
-
-        loginScreen.classList.add('hidden');  // Esconde a tela de login
-    }
-});
-
-
-        // Funções para Admin Dashboard
+        // Função para carregar o painel admin
         async function loadAdminDashboard() {
             const { data: tickets } = await supabase.from('tickets').select('*');
             const openTickets = tickets.filter(t => t.status === 'open').length;
@@ -238,8 +179,35 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             document.getElementById('usersCount').textContent = totalUsers.length;
         }
 
+        // Função para carregar o painel do cliente
+        async function loadClientDashboard() {
+            const { data: tickets } = await supabase
+                .from('tickets')
+                .select('*')
+                .eq('user_id', supabase.auth.user().id);  // Utiliza o UID para garantir que o cliente veja apenas os próprios dados
+
+            const container = document.getElementById('clientTicketsList');
+            container.innerHTML = '';
+
+            tickets.forEach(ticket => {
+                const ticketCard = document.createElement('div');
+                ticketCard.className = 'border border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-4';
+                ticketCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800 dark:text-white">Protocolo: ${ticket.protocol}</h4>
+                        <span class="px-2 py-1 text-xs font-semibold ${ticket.status === 'open' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'} rounded-full">${ticket.status}</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>Solicitante:</strong> ${ticket.requester}</p>
+                    <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>Descrição:</strong> ${ticket.description}</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm"><strong>Aberto em:</strong> ${new Date(ticket.created_at).toLocaleString()}</p>
+                `;
+                container.appendChild(ticketCard);
+            });
+        }
+
         // Logout
-        logoutBtn.addEventListener('click', function () {
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabase.auth.signOut();
             currentUser = null;
             loginScreen.classList.remove('hidden');
             adminDashboard.classList.add('hidden');
