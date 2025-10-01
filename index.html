@@ -132,87 +132,45 @@
     </div>
 
     <script>
-        // ** Declarando o Supabase uma vez! **
+        // Inicialização do Supabase
         const supabase = createClient('https://wrwyxhjbpysathipjlvk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indyd3l4aGpicHlzYXRoaXBqbHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzUzMTMsImV4cCI6MjA3NDg1MTMxM30.XLTxlzVgKFR1n-Krd7v7QhX6-bA8tJz4DGGw0pBAiRg');
-        let currentUser = null;
 
         // Função de Login
         document.getElementById('loginForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+            e.preventDefault();  // Impede o comportamento padrão do formulário (não recarrega a página)
+
             const username = document.getElementById('username').value;  // Email
             const password = document.getElementById('password').value;  // Senha
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: username,
-                password: password,
-            });
+            try {
+                // Autenticar com o Supabase
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: username,
+                    password: password,
+                });
 
-            if (error) {
-                alert('Erro de autenticação: ' + error.message);
-            } else {
-                currentUser = data.user;
-
-                // Verificar se é admin
-                const isAdmin = currentUser.email === 'admin@example.com';  // Troque pelo email do admin
-
-                if (isAdmin) {
-                    adminDashboard.classList.remove('hidden');
-                    loadAdminDashboard();  // Função para carregar o painel admin
-                } else {
-                    clientDashboard.classList.remove('hidden');
-                    loadClientDashboard();  // Função para carregar o painel cliente
+                if (error) {
+                    alert('Erro de autenticação: ' + error.message);
+                    return;
                 }
 
+                // Verificar se o usuário é o admin
+                const isAdmin = data.user.email === 'admin@example.com';  // Verifique o email do admin configurado
+
+                if (isAdmin) {
+                    // Redirecionar ou mostrar o painel do Admin
+                    window.location.href = '/admin-dashboard';  // Altere conforme necessário
+                } else {
+                    // Redirecionar ou mostrar o painel do Cliente
+                    window.location.href = '/client-dashboard';  // Altere conforme necessário
+                }
+
+                // Esconder tela de login
                 loginScreen.classList.add('hidden');
+            } catch (error) {
+                console.error('Erro ao autenticar:', error);
+                alert('Erro desconhecido: ' + error.message);
             }
-        });
-
-        // Função para carregar o painel admin
-        async function loadAdminDashboard() {
-            const { data: tickets } = await supabase.from('tickets').select('*');
-            const openTickets = tickets.filter(t => t.status === 'open').length;
-            const closedTickets = tickets.filter(t => t.status === 'closed').length;
-            const totalUsers = await supabase.from('users_client').select('*');
-
-            document.getElementById('openTicketsCount').textContent = openTickets;
-            document.getElementById('closedTicketsCount').textContent = closedTickets;
-            document.getElementById('usersCount').textContent = totalUsers.length;
-        }
-
-        // Função para carregar o painel do cliente
-        async function loadClientDashboard() {
-            const { data: tickets } = await supabase
-                .from('tickets')
-                .select('*')
-                .eq('user_id', supabase.auth.user().id);  // Utiliza o UID para garantir que o cliente veja apenas os próprios dados
-
-            const container = document.getElementById('clientTicketsList');
-            container.innerHTML = '';
-
-            tickets.forEach(ticket => {
-                const ticketCard = document.createElement('div');
-                ticketCard.className = 'border border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-4';
-                ticketCard.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <h4 class="font-semibold text-gray-800 dark:text-white">Protocolo: ${ticket.protocol}</h4>
-                        <span class="px-2 py-1 text-xs font-semibold ${ticket.status === 'open' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'} rounded-full">${ticket.status}</span>
-                    </div>
-                    <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>Solicitante:</strong> ${ticket.requester}</p>
-                    <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>Descrição:</strong> ${ticket.description}</p>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm"><strong>Aberto em:</strong> ${new Date(ticket.created_at).toLocaleString()}</p>
-                `;
-                container.appendChild(ticketCard);
-            });
-        }
-
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await supabase.auth.signOut();
-            currentUser = null;
-            loginScreen.classList.remove('hidden');
-            adminDashboard.classList.add('hidden');
-            clientDashboard.classList.add('hidden');
-            document.getElementById('loginForm').reset();
         });
     </script>
 </body>
