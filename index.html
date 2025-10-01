@@ -149,10 +149,15 @@
                     password: password,
                 });
 
+                // Verificar se houve erro
                 if (error) {
+                    console.error('Erro de autenticação:', error.message);
                     alert('Erro de autenticação: ' + error.message);
                     return;
                 }
+
+                // Exibe o usuário autenticado
+                console.log('Usuário autenticado:', data.user);
 
                 // Verificar se o usuário é o admin
                 const isAdmin = data.user.email === 'admin@example.com';  // Verifique o email do admin configurado
