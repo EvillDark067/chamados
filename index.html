@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
+        /* Estilo básico do body e animações */
         body {
             box-sizing: border-box;
         }
@@ -33,26 +34,6 @@
     </style>
 </head>
 <body class="min-h-screen transition-all duration-300 dark-mode">
-    <!-- Header com logo e controles -->
-    <header class="bg-gray-800 shadow-lg p-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-white">SISTEMA DE CHAMADOS T.I</h1>
-                <p class="text-gray-300 text-sm">CNPJ: 54.677.769/0001-78</p>
-            </div>
-            <div class="flex items-center space-x-4">
-                <!-- Toggle modo escuro/claro -->
-                <button id="themeToggle" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                    🌙 Modo Claro
-                </button>
-                <!-- Botão de logout -->
-                <button id="logoutBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-                    Sair
-                </button>
-            </div>
-        </div>
-    </header>
-
     <!-- Tela de Login -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md">
@@ -81,58 +62,8 @@
         </div>
     </div>
 
-    <!-- Dashboard Admin -->
-    <div id="adminDashboard" class="hidden">
-        <div class="max-w-7xl mx-auto p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Chamados Abertos</h3>
-                    <p id="openTicketsCount" class="text-3xl font-bold text-blue-600">0</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Chamados Encerrados</h3>
-                    <p id="closedTicketsCount" class="text-3xl font-bold text-green-600">0</p>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Total de Usuários</h3>
-                    <p id="usersCount" class="text-3xl font-bold text-purple-600">0</p>
-                </div>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Ações Administrativas</h3>
-                <div class="flex flex-wrap gap-4">
-                    <button id="createUserBtn" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors">
-                        + Criar Usuário
-                    </button>
-                    <button id="generateReportBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors">
-                        📊 Gerar Relatório PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Dashboard Cliente -->
-    <div id="clientDashboard" class="hidden">
-        <div class="max-w-4xl mx-auto p-6">
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg mb-8">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Abrir Novo Chamado</h3>
-                <button id="newTicketBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
-                    + Novo Chamado
-                </button>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">Meus Chamados</h3>
-                </div>
-                <div id="clientTicketsList" class="p-6"></div>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Inicialização do Supabase
+        // Inicialização do Supabase (certifique-se de substituir com as credenciais do seu projeto)
         const supabase = createClient('https://wrwyxhjbpysathipjlvk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indyd3l4aGpicHlzYXRoaXBqbHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzUzMTMsImV4cCI6MjA3NDg1MTMxM30.XLTxlzVgKFR1n-Krd7v7QhX6-bA8tJz4DGGw0pBAiRg');
 
         // Função de Login
@@ -149,15 +80,10 @@
                     password: password,
                 });
 
-                // Verificar se houve erro
                 if (error) {
-                    console.error('Erro de autenticação:', error.message);
                     alert('Erro de autenticação: ' + error.message);
                     return;
                 }
-
-                // Exibe o usuário autenticado
-                console.log('Usuário autenticado:', data.user);
 
                 // Verificar se o usuário é o admin
                 const isAdmin = data.user.email === 'admin@example.com';  // Verifique o email do admin configurado
