@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Suporte - TI Help Desk</title>
+    <style>
+        /* Estilos gerais do corpo da página - define o tema dark mode padrão */
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Fundo escuro principal */
+            color: #f5f5f5; /* Texto claro */
+            line-height: 1.6;
+        }
+
+        /* Aplicar box-sizing para todos os elementos */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Container principal - centraliza o conteúdo na página */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Cabeçalho do sistema - título e descrição */
+        .header {
+            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #4CAF50;
+            font-size: 2.5rem;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            color: #b0b0b0;
+        }
+
+        /* Seletor de painéis - botões para alternar entre usuário e admin */
+        .panel-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Estilo dos botões de seleção de painel */
+        .panel-btn {
+            background: linear-gradient(135deg, #333, #444);
+            color: #f5f5f5;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Efeito hover nos botões de painel */
+        .panel-btn:hover {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            transform: translateY(-2px);
+        }
+
+        /* Botão ativo (painel selecionado) */
+        .panel-btn.active {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        /* Container dos painéis - esconde por padrão */
+        .panel {
+            display: none;
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Painel ativo - torna visível */
+        .panel.active {
+            display: block;
+        }
+
+        /* Grupo de campos do formulário - espaçamento entre campos */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* Labels dos campos - texto descritivo dos inputs */
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #f5f5f5;
+            font-weight: 500;
+        }
+
+        /* Estilo dos campos de entrada (input, textarea, select) */
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #2d2d2d; /* Fundo escuro para os campos */
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #f5f5f5;
+            font-size: 1rem;
+        }
+
+        /* Efeito de foco nos campos - destaca quando selecionado */
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50; /* Borda verde quando focado */
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        /* Container dos checkboxes - agrupa os serviços disponíveis */
+        .checkbox-group {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Título do grupo de checkboxes */
+        .checkbox-group h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        /* Item individual de checkbox - alinha checkbox com texto */
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        /* Estilo específico dos checkboxes - aumenta o tamanho */
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.2); /* Aumenta o tamanho do checkbox */
+        }
+
+        /* Botão padrão - estilo principal verde */
+        .btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Efeito hover do botão padrão */
+        .btn:hover {
+            background: linear-gradient(135deg, #45a049, #3d8b40);
+            transform: translateY(-1px);
+        }
+
+        /* Botão de perigo - vermelho para ações destrutivas */
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        /* Efeito hover do botão de perigo */
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #d32f2f, #c62828);
+        }
+
+        /* Botão de aviso - laranja para ações de atenção */
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+
+        /* Efeito hover do botão de aviso */
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #f57c00, #ef6c00);
+        }
+
+        /* Card individual de chamado - container para cada ticket */
+        .ticket-card {
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50; /* Borda verde para chamados ativos */
+        }
+
+        /* Card de chamado fechado - visual diferenciado */
+        .ticket-card.closed {
+            border-left-color: #666; /* Borda cinza para chamados fechados */
+            opacity: 0.8;
+        }
+
+        /* Cabeçalho do card - protocolo e status */
+        .ticket-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        /* Número do protocolo do chamado - destaque em verde */
+        .ticket-protocol {
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 1.1rem;
+        }
+
+        /* Badge de status do chamado */
+        .ticket-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Status "Aberto" - verde */
+        .status-open {
+            background: #4CAF50;
+            color: white;
+        }
+
+        /* Status "Fechado" - cinza */
+        .status-closed {
+            background: #666;
+            color: white;
+        }
+
+        /* Status "Em Andamento" - laranja */
+        .status-in-progress {
+            background: #ff9800;
+            color: white;
+        }
+
+        /* Dashboard - grid de estatísticas do admin */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Card individual do dashboard - mostra estatísticas */
+        .dashboard-card {
+            background: linear-gradient(135deg, #2d2d2d, #3d3d3d);
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Título do card do dashboard */
+        .dashboard-card h3 {
+            margin: 0 0 10px 0;
+            color: #4CAF50;
+        }
+
+        /* Número grande das estatísticas */
+        .dashboard-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f5f5f5;
+        }
+
+        /* Container das abas - navegação entre seções */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+        }
+
+        /* Botão individual de aba */
+        .tab {
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        /* Aba ativa - destaque verde */
+        .tab.active {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        /* Efeito hover nas abas */
+        .tab:hover {
+            color: #f5f5f5;
+        }
+
+        /* Conteúdo das abas - escondido por padrão */
+        .tab-content {
+            display: none;
+        }
+
+        /* Conteúdo da aba ativa - visível */
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Formulário de login - centralizado e com largura limitada */
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Mensagem de erro - fundo vermelho */
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Mensagem de sucesso - fundo verde */
+        .success-message {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Responsividade para dispositivos móveis (tablets e celulares) */
+        @media (max-width: 768px) {
+            /* Reduz padding do container em telas pequenas */
+            .container {
+                padding: 10px;
+            }
+            
+            /* Empilha os botões de painel verticalmente */
+            .panel-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            /* Dashboard em coluna única em telas pequenas */
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Reduz o tamanho do título principal */
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Container principal da aplicação -->
+    <div class="container">
+        <!-- Cabeçalho com título e descrição do sistema -->
+        <div class="header">
+            <h1>🛠️ TI Help Desk</h1>
+            <p>Sistema de Suporte Técnico</p>
+        </div>
+
+        <!-- Botões para alternar entre painel do usuário e admin -->
+        <div class="panel-selector">
+            <button class="panel-btn active" onclick="showPanel('user')">Painel do Usuário</button>
+            <button class="panel-btn" onclick="showPanel('admin')">Painel do Admin</button>
+        </div>
+
+        <!-- Painel do Usuário - área para clientes acessarem e criarem chamados -->
+        <div id="userPanel" class="panel active">
+            <!-- Formulário de login do usuário (usuário e senha) -->
+            <div id="userLogin">
+                <h2>Acesso do Usuário</h2>
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="userLoginName">Usuário:</label>
+                        <input type="text" id="userLoginName" placeholder="user">
+                    </div>
+                    <div class="form-group">
+                        <label for="userPassword">Senha:</label>
+                        <input type="password" id="userPassword" placeholder="user123">
+                    </div>
+                    <button class="btn" onclick="userLogin()">Entrar</button>
+                </div>
+            </div>
+
+            <!-- Dashboard do usuário - área logada com funcionalidades -->
+            <div id="userDashboard" style="display: none;">
+                <!-- Cabeçalho do dashboard com boas-vindas e botão de sair -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Bem-vindo, <span id="currentUserName"></span>!</h2>
+                    <button class="btn btn-danger" onclick="userLogout()">Sair</button>
+                </div>
+
+                <!-- Abas de navegação do usuário -->
+                <div class="tabs">
+                    <button class="tab active" onclick="showUserTab('newTicket')">Novo Chamado</button>
+                    <button class="tab" onclick="showUserTab('myTickets')">Meus Chamados</button>
+                </div>
+
+                <!-- Aba para criar novo chamado -->
+                <div id="newTicketTab" class="tab-content active">
+                    <h3>Abrir Novo Chamado</h3>
+                    <!-- Formulário de criação de chamado -->
+                    <form id="ticketForm">
+                        <!-- Campo para nome do solicitante -->
+                        <div class="form-group">
+                            <label for="requesterName">Nome do Solicitante:</label>
+                            <input type="text" id="requesterName" placeholder="Digite o nome completo do solicitante" required>
+                        </div>
+                        
+                        <!-- Lista de serviços disponíveis com checkboxes -->
+                        <div class="checkbox-group">
+                            <h3>Selecione os serviços necessários:</h3>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="service1" value="Instalar impressora remoto">
+                                <label for="service1">Instalar impressora remoto</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="service2" value="Instalar um programa remoto">
+                                <label for="service2">Instalar um programa remoto</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="service3" value="Formatação de notebook ou computador + configuração">
+                                <label for="service3">Formatação de notebook ou computador + configuração</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="service4" value="Configuração de notebook">
+                                <label for="service4">Configuração de notebook</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="service5" value="Suporte no local">
+                                <label for="service5">Suporte no local</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo de texto para descrição detalhada do problema -->
+                        <div class="form-group">
+                            <label for="problemDescription">Descrição do Problema:</label>
+                            <textarea id="problemDescription" rows="5" placeholder="Descreva detalhadamente o problema ou solicitação..."></textarea>
+                        </div>
+
+                        <!-- Botão para submeter o chamado -->
+                        <button type="submit" class="btn">Abrir Chamado</button>
+                    </form>
+                </div>
+
+                <!-- Aba para visualizar chamados do usuário -->
+                <div id="myTicketsTab" class="tab-content">
+                    <h3>Meus Chamados</h3>
+                    <!-- Lista dinâmica dos chamados do usuário -->
+                    <div id="userTicketsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel do Admin - área para técnicos gerenciarem chamados -->
+        <div id="adminPanel" class="panel">
+            <!-- Formulário de login do administrador -->
+            <div id="adminLogin">
+                <h2>Acesso do Administrador</h2>
+                <div class="login-form">
+                    <div class="form-group">
+                        <label for="adminUser">Usuário:</label>
+                        <input type="text" id="adminUser" placeholder="admin">
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPass">Senha:</label>
+                        <input type="password" id="adminPass" placeholder="admin123">
+                    </div>
+                    <button class="btn" onclick="adminLogin()">Entrar</button>
+                </div>
+            </div>
+
+            <!-- Dashboard administrativo - área logada do admin -->
+            <div id="adminDashboard" style="display: none;">
+                <!-- Cabeçalho do painel admin com botão de sair -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Painel Administrativo</h2>
+                    <button class="btn btn-danger" onclick="adminLogout()">Sair</button>
+                </div>
+
+                <!-- Cards de estatísticas do sistema -->
+                <div class="dashboard">
+                    <div class="dashboard-card">
+                        <h3>Chamados Abertos</h3>
+                        <div class="number" id="openTicketsCount">0</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Chamados Finalizados</h3>
+                        <div class="number" id="closedTicketsCount">0</div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Total de Chamados</h3>
+                        <div class="number" id="totalTicketsCount">0</div>
+                    </div>
+                </div>
+
+                <!-- Botões para gerar relatórios -->
+                <div style="margin-bottom: 20px;">
+                    <button class="btn" onclick="generateReport('weekly')">Relatório Semanal</button>
+                    <button class="btn" onclick="generateReport('monthly')">Relatório Mensal</button>
+                </div>
+
+                <!-- Abas de navegação do admin -->
+                <div class="tabs">
+                    <button class="tab active" onclick="showAdminTab('openTickets')">Chamados Abertos</button>
+                    <button class="tab" onclick="showAdminTab('closedTickets')">Chamados Finalizados</button>
+                </div>
+
+                <!-- Aba de chamados abertos -->
+                <div id="openTicketsTab" class="tab-content active">
+                    <h3>Chamados Abertos</h3>
+                    <!-- Lista dinâmica de chamados abertos -->
+                    <div id="openTicketsList"></div>
+                </div>
+
+                <!-- Aba de chamados finalizados -->
+                <div id="closedTicketsTab" class="tab-content">
+                    <h3>Chamados Finalizados</h3>
+                    <!-- Lista dinâmica de chamados finalizados -->
+                    <div id="closedTicketsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé com informações de contato -->
+    <footer style="background: #1e1e1e; padding: 30px 0; margin-top: 50px; border-top: 1px solid #444;">
+        <div class="container">
+            <div style="text-align: center; color: #b0b0b0;">
+                <h3 style="color: #4CAF50; margin-bottom: 20px;">📞 Informações de Contato</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto;">
+                    <div>
+                        <strong style="color: #f5f5f5;">📧 Email:</strong><br>
+                        <a href="mailto:lfragozo563@gmail.com" style="color: #4CAF50; text-decoration: none;">lfragozo563@gmail.com</a>
+                    </div>
+                    <div>
+                        <strong style="color: #f5f5f5;">📱 Celular:</strong><br>
+                        <a href="tel:+5551993525004" style="color: #4CAF50; text-decoration: none;">51 99352-5004</a>
+                    </div>
+                    <div>
+                        <strong style="color: #f5f5f5;">🏢 CNPJ:</strong><br>
+                        <span style="color: #f5f5f5;">54.677.769/0001-78</span>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #444; color: #888;">
+                    <p>© 2024 TI Help Desk - Todos os direitos reservados</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Biblioteca jsPDF para gerar PDFs reais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Biblioteca Supabase para banco de dados -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ========== CONFIGURAÇÃO DO SUPABASE ==========
+        // IMPORTANTE: Substitua estas configurações pelas suas próprias do Supabase
+        const SUPABASE_URL = 'https://seu-projeto.supabase.co'; // Substitua pela sua URL
+        const SUPABASE_ANON_KEY = 'sua-chave-anonima-aqui'; // Substitua pela sua chave
+        
+        // Inicializa o cliente Supabase (descomente quando configurar)
+        // const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // ========== VARIÁVEIS GLOBAIS ==========
+        // Array que armazena todos os chamados do sistema (conectado ao Supabase)
+        let tickets = [];
+        // Objeto que armazena dados do usuário logado
+        let currentUser = null;
+        // Objeto que armazena dados do administrador logado
+        let currentAdmin = null;
+        // Contador para gerar números sequenciais dos protocolos (CH-0001, CH-0002, etc.)
+        let ticketCounter = 1;
+
+        // ========== FUNÇÕES DE NAVEGAÇÃO ==========
+        
+        /**
+         * Alterna entre o painel do usuário e do administrador
+         * Remove a classe 'active' de todos os painéis e botões, depois ativa o selecionado
+         */
+        function showPanel(panel) {
+            // Remove destaque de todos os painéis e botões
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.panel-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Ativa o painel selecionado (usuário ou admin)
+            if (panel === 'user') {
+                document.getElementById('userPanel').classList.add('active');
+                document.querySelector('[onclick="showPanel(\'user\')"]').classList.add('active');
+            } else {
+                document.getElementById('adminPanel').classList.add('active');
+                document.querySelector('[onclick="showPanel(\'admin\')"]').classList.add('active');
+            }
+        }
+
+        /**
+         * Navega entre as abas do painel do usuário (Novo Chamado / Meus Chamados)
+         * Remove destaque de todas as abas e conteúdos, depois ativa a selecionada
+         */
+        function showUserTab(tab) {
+            // Remove destaque de todas as abas do usuário
+            document.querySelectorAll('#userDashboard .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#userDashboard .tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            // Ativa a aba selecionada
+            document.querySelector(`[onclick="showUserTab('${tab}')"]`).classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            
+            // Se for a aba "Meus Chamados", carrega os chamados do usuário
+            if (tab === 'myTickets') {
+                loadUserTickets();
+            }
+        }
+
+        /**
+         * Navega entre as abas do painel do admin (Chamados Abertos / Finalizados)
+         * Remove destaque de todas as abas e conteúdos, depois ativa a selecionada
+         */
+        function showAdminTab(tab) {
+            // Remove destaque de todas as abas do admin
+            document.querySelectorAll('#adminDashboard .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#adminDashboard .tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            // Ativa a aba selecionada
+            document.querySelector(`[onclick="showAdminTab('${tab}')"]`).classList.add('active');
+            document.getElementById(tab + 'Tab').classList.add('active');
+            
+            // Recarrega a lista de chamados para o admin
+            loadAdminTickets();
+        }
+
+        // ========== FORMATAÇÃO DE DADOS ==========
+        // (Removido formatação de CPF - agora usando sistema de login com usuário/senha)
+
+        // ========== SISTEMA DE LOGIN ==========
+        
+        /**
+         * Realiza o login do usuário comum
+         * Valida credenciais no Supabase ou usa fallback local
+         */
+        async function userLogin() {
+            // Pega os valores dos campos de login
+            const username = document.getElementById('userLoginName').value.trim();
+            const password = document.getElementById('userPassword').value.trim();
+
+            // Verifica se todos os campos foram preenchidos
+            if (!username || !password) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+
+            try {
+                // MÉTODO 1: Autenticação via Supabase (descomente quando configurar)
+                /*
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: username + '@helpdesk.local', // Converte username em email
+                    password: password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Busca dados do usuário na tabela 'users'
+                const { data: userData, error: userError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('role', 'user')
+                    .single();
+
+                if (userError) {
+                    throw userError;
+                }
+                */
+
+                // MÉTODO 2: Fallback local (remova quando Supabase estiver configurado)
+                if (username === 'user' && password === 'user123') {
+                    const userData = { 
+                        id: 1,
+                        username: username,
+                        name: 'Usuário do Sistema',
+                        role: 'user',
+                        loginTime: new Date().toISOString()
+                    };
+
+                    currentUser = userData;
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                    
+                    // Exibe o nome do usuário no cabeçalho
+                    document.getElementById('currentUserName').textContent = userData.name;
+                    // Esconde a tela de login e mostra o dashboard
+                    document.getElementById('userLogin').style.display = 'none';
+                    document.getElementById('userDashboard').style.display = 'block';
+                    // Carrega os chamados do usuário
+                    loadUserTickets();
+                } else {
+                    throw new Error('Credenciais inválidas');
+                }
+
+            } catch (error) {
+                console.error('Erro no login:', error);
+                alert('Usuário ou senha incorretos!');
+            }
+        }
+
+        /**
+         * Realiza o logout do usuário comum
+         * Limpa os dados do usuário e volta para a tela de login
+         */
+        function userLogout() {
+            // Remove os dados do usuário logado
+            currentUser = null;
+            // Remove do localStorage para não persistir
+            localStorage.removeItem('currentUser');
+            // Volta para a tela de login
+            document.getElementById('userLogin').style.display = 'block';
+            document.getElementById('userDashboard').style.display = 'none';
+            // Limpa os campos do formulário
+            document.getElementById('userLoginName').value = '';
+            document.getElementById('userPassword').value = '';
+        }
+
+        /**
+         * Realiza o login do administrador
+         * Valida credenciais no Supabase ou usa fallback local
+         */
+        async function adminLogin() {
+            // Pega os valores dos campos de login
+            const username = document.getElementById('adminUser').value.trim();
+            const password = document.getElementById('adminPass').value.trim();
+
+            // Verifica se todos os campos foram preenchidos
+            if (!username || !password) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+
+            try {
+                // MÉTODO 1: Autenticação via Supabase (descomente quando configurar)
+                /*
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: username + '@helpdesk.local', // Converte username em email
+                    password: password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Busca dados do admin na tabela 'users'
+                const { data: adminData, error: adminError } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('role', 'admin')
+                    .single();
+
+                if (adminError) {
+                    throw adminError;
+                }
+                */
+
+                // MÉTODO 2: Fallback local (remova quando Supabase estiver configurado)
+                if (username === 'admin' && password === 'admin123') {
+                    const adminData = { 
+                        id: 2,
+                        username: username,
+                        name: 'Administrador do Sistema',
+                        role: 'admin',
+                        loginTime: new Date().toISOString()
+                    };
+
+                    currentAdmin = adminData;
+                    localStorage.setItem('currentAdmin', JSON.stringify(adminData));
+                    
+                    // Esconde a tela de login e mostra o dashboard
+                    document.getElementById('adminLogin').style.display = 'none';
+                    document.getElementById('adminDashboard').style.display = 'block';
+                    // Carrega o dashboard com estatísticas
+                    loadAdminDashboard();
+                } else {
+                    throw new Error('Credenciais inválidas');
+                }
+
+            } catch (error) {
+                console.error('Erro no login do admin:', error);
+                alert('Usuário ou senha incorretos!');
+            }
+        }
+
+        /**
+         * Realiza o logout do administrador
+         * Limpa os dados do admin e volta para a tela de login
+         */
+        function adminLogout() {
+            // Remove os dados do admin logado
+            currentAdmin = null;
+            // Remove do localStorage para não persistir
+            localStorage.removeItem('currentAdmin');
+            // Volta para a tela de login
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('adminDashboard').style.display = 'none';
+            // Limpa os campos do formulário
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+        }
+
+        // ========== GERENCIAMENTO DE CHAMADOS ==========
+        
+        /**
+         * Processa o envio do formulário de novo chamado
+         * Coleta os serviços selecionados, nome do solicitante e descrição
+         */
+        document.getElementById('ticketForm').addEventListener('submit', async function(e) {
+            // Impede o envio padrão do formulário (que recarregaria a página)
+            e.preventDefault();
+            
+            // Pega o nome do solicitante
+            const requesterName = document.getElementById('requesterName').value.trim();
+            
+            // Coleta todos os serviços marcados nos checkboxes
+            const services = [];
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked').forEach(cb => {
+                services.push(cb.value);
+            });
+            
+            // Pega a descrição do problema
+            const description = document.getElementById('problemDescription').value.trim();
+            
+            // Verifica se os campos obrigatórios foram preenchidos
+            if (!requesterName) {
+                alert('Por favor, informe o nome do solicitante.');
+                return;
+            }
+            
+            if (services.length === 0 && !description) {
+                alert('Por favor, selecione pelo menos um serviço ou descreva o problema.');
+                return;
+            }
+            
+            try {
+                // Cria o objeto do chamado com todas as informações
+                const ticket = {
+                    id: Date.now(), // ID único baseado no timestamp
+                    protocol: `CH-${String(ticketCounter).padStart(4, '0')}`, // Protocolo formatado
+                    user: currentUser, // Dados do usuário que criou
+                    requesterName: requesterName, // Nome do solicitante
+                    services: services, // Lista de serviços selecionados
+                    description: description, // Descrição do problema
+                    status: 'open', // Status inicial sempre "aberto"
+                    createdAt: new Date(), // Data/hora de criação
+                    updatedAt: new Date() // Data/hora da última atualização
+                };
+                
+                // MÉTODO 1: Salvar no Supabase (descomente quando configurar)
+                /*
+                const { data, error } = await supabase
+                    .from('tickets')
+                    .insert([{
+                        protocol: ticket.protocol,
+                        user_id: currentUser.id,
+                        requester_name: requesterName,
+                        services: services,
+                        description: description,
+                        status: 'open',
+                        created_at: ticket.createdAt.toISOString(),
+                        updated_at: ticket.updatedAt.toISOString()
+                    }])
+                    .select();
+
+                if (error) {
+                    throw error;
+                }
+                */
+
+                // MÉTODO 2: Fallback local (remova quando Supabase estiver configurado)
+                tickets.push(ticket);
+                ticketCounter++;
+                saveTicketsToStorage();
+                
+                // Limpa todos os campos do formulário
+                document.getElementById('ticketForm').reset();
+                
+                // Confirma a criação e vai para "Meus Chamados"
+                alert(`Chamado ${ticket.protocol} criado com sucesso!`);
+                showUserTab('myTickets');
+
+            } catch (error) {
+                console.error('Erro ao criar chamado:', error);
+                alert('Erro ao criar chamado. Tente novamente.');
+            }
+        });
+
+        /**
+         * Carrega e exibe todos os chamados do usuário logado
+         * Filtra os chamados pelo CPF e monta o HTML para exibição
+         */
+        function loadUserTickets() {
+            // Verifica se há usuário logado
+            if (!currentUser) return;
+            
+            // Filtra apenas os chamados do usuário atual (futuramente do Supabase)
+            const userTickets = tickets.filter(t => t.user.username === currentUser.username);
+            const container = document.getElementById('userTicketsList');
+            
+            // Se não há chamados, exibe mensagem
+            if (userTickets.length === 0) {
+                container.innerHTML = '<p>Você ainda não possui chamados.</p>';
+                return;
+            }
+            
+            // Monta o HTML para cada chamado do usuário
+            container.innerHTML = userTickets.map(ticket => `
+                <div class="ticket-card ${ticket.status === 'closed' ? 'closed' : ''}">
+                    <div class="ticket-header">
+                        <span class="ticket-protocol">${ticket.protocol}</span>
+                        <span class="ticket-status status-${ticket.status === 'open' ? 'open' : ticket.status === 'in-progress' ? 'in-progress' : 'closed'}">
+                            ${ticket.status === 'open' ? 'Aberto' : ticket.status === 'in-progress' ? 'Em Andamento' : 'Finalizado'}
+                        </span>
+                    </div>
+                    <div><strong>Solicitante:</strong> ${ticket.requesterName || 'Não informado'}</div>
+                    <div><strong>Serviços:</strong> ${ticket.services.join(', ') || 'Nenhum serviço selecionado'}</div>
+                    <div><strong>Descrição:</strong> ${ticket.description || 'Sem descrição'}</div>
+                    <div><strong>Criado em:</strong> ${ticket.createdAt.toLocaleString('pt-BR')}</div>
+                    ${ticket.status === 'open' ? `<button class="btn btn-danger" onclick="deleteTicket(${ticket.id})">Excluir Chamado</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Permite ao usuário excluir seus próprios chamados (apenas se estiverem abertos)
+         * Confirma a ação e remove o chamado da lista
+         */
+        function deleteTicket(ticketId) {
+            if (confirm('Tem certeza que deseja excluir este chamado?')) {
+                // Remove o chamado da lista (futuramente excluirá do Supabase)
+                tickets = tickets.filter(t => t.id !== ticketId);
+                // Salva no localStorage para persistir
+                saveTicketsToStorage();
+                // Recarrega a lista de chamados do usuário
+                loadUserTickets();
+            }
+        }
+
+        // ========== PAINEL ADMINISTRATIVO ==========
+        
+        /**
+         * Carrega o dashboard do administrador com estatísticas
+         * Conta chamados abertos, fechados e total, depois carrega as listas
+         */
+        function loadAdminDashboard() {
+            // Separa os chamados por status (futuramente do Supabase)
+            const openTickets = tickets.filter(t => t.status === 'open' || t.status === 'in-progress');
+            const closedTickets = tickets.filter(t => t.status === 'closed');
+            
+            // Atualiza os números das estatísticas no dashboard
+            document.getElementById('openTicketsCount').textContent = openTickets.length;
+            document.getElementById('closedTicketsCount').textContent = closedTickets.length;
+            document.getElementById('totalTicketsCount').textContent = tickets.length;
+            
+            // Carrega as listas de chamados
+            loadAdminTickets();
+        }
+
+        /**
+         * Carrega e exibe os chamados para o administrador
+         * Separa em abas: chamados abertos e chamados finalizados
+         */
+        function loadAdminTickets() {
+            // Separa os chamados por status (futuramente do Supabase)
+            const openTickets = tickets.filter(t => t.status === 'open' || t.status === 'in-progress');
+            const closedTickets = tickets.filter(t => t.status === 'closed');
+            
+            // ===== CHAMADOS ABERTOS =====
+            const openContainer = document.getElementById('openTicketsList');
+            if (openTickets.length === 0) {
+                openContainer.innerHTML = '<p>Nenhum chamado aberto no momento.</p>';
+            } else {
+                // Monta o HTML para cada chamado aberto com botões de ação
+                openContainer.innerHTML = openTickets.map(ticket => `
+                    <div class="ticket-card">
+                        <div class="ticket-header">
+                            <span class="ticket-protocol">${ticket.protocol}</span>
+                            <span class="ticket-status status-${ticket.status === 'open' ? 'open' : 'in-progress'}">
+                                ${ticket.status === 'open' ? 'Aberto' : 'Em Andamento'}
+                            </span>
+                        </div>
+                        <div><strong>Solicitante:</strong> ${ticket.requesterName || 'Não informado'}</div>
+                        <div><strong>Cliente:</strong> ${ticket.user.name}</div>
+                        <div><strong>Usuário:</strong> ${ticket.user.username}</div>
+                        <div><strong>Serviços:</strong> ${ticket.services.join(', ') || 'Nenhum serviço selecionado'}</div>
+                        <div><strong>Descrição:</strong> ${ticket.description || 'Sem descrição'}</div>
+                        <div><strong>Criado em:</strong> ${ticket.createdAt.toLocaleString('pt-BR')}</div>
+                        <div style="margin-top: 15px;">
+                            ${ticket.status === 'open' ? `<button class="btn btn-warning" onclick="startTicket(${ticket.id})">Iniciar Atendimento</button>` : ''}
+                            <button class="btn" onclick="closeTicket(${ticket.id})">Finalizar Chamado</button>
+                            <button class="btn btn-danger" onclick="adminDeleteTicket(${ticket.id})">Excluir</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // ===== CHAMADOS FECHADOS =====
+            const closedContainer = document.getElementById('closedTicketsList');
+            if (closedTickets.length === 0) {
+                closedContainer.innerHTML = '<p>Nenhum chamado finalizado ainda.</p>';
+            } else {
+                // Monta o HTML para cada chamado finalizado
+                closedContainer.innerHTML = closedTickets.map(ticket => `
+                    <div class="ticket-card closed">
+                        <div class="ticket-header">
+                            <span class="ticket-protocol">${ticket.protocol}</span>
+                            <span class="ticket-status status-closed">Finalizado</span>
+                        </div>
+                        <div><strong>Solicitante:</strong> ${ticket.requesterName || 'Não informado'}</div>
+                        <div><strong>Cliente:</strong> ${ticket.user.name}</div>
+                        <div><strong>Usuário:</strong> ${ticket.user.username}</div>
+                        <div><strong>Serviços:</strong> ${ticket.services.join(', ') || 'Nenhum serviço selecionado'}</div>
+                        <div><strong>Descrição:</strong> ${ticket.description || 'Sem descrição'}</div>
+                        <div><strong>Criado em:</strong> ${ticket.createdAt.toLocaleString('pt-BR')}</div>
+                        <div><strong>Finalizado em:</strong> ${ticket.updatedAt.toLocaleString('pt-BR')}</div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-danger" onclick="adminDeleteTicket(${ticket.id})">Excluir</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        /**
+         * Inicia o atendimento de um chamado (muda status de "aberto" para "em andamento")
+         * Atualiza o status e a data de modificação
+         */
+        function startTicket(ticketId) {
+            // Encontra o chamado pelo ID (futuramente atualizará no Supabase)
+            const ticket = tickets.find(t => t.id === ticketId);
+            if (ticket) {
+                // Muda o status para "em andamento"
+                ticket.status = 'in-progress';
+                // Atualiza a data de modificação
+                ticket.updatedAt = new Date();
+                // Salva no localStorage para persistir
+                saveTicketsToStorage();
+                // Recarrega o dashboard para mostrar as mudanças
+                loadAdminDashboard();
+            }
+        }
+
+        /**
+         * Finaliza um chamado (muda status para "fechado")
+         * Confirma a ação e atualiza o status
+         */
+        function closeTicket(ticketId) {
+            if (confirm('Tem certeza que deseja finalizar este chamado?')) {
+                // Encontra o chamado pelo ID (futuramente atualizará no Supabase)
+                const ticket = tickets.find(t => t.id === ticketId);
+                if (ticket) {
+                    // Muda o status para "fechado"
+                    ticket.status = 'closed';
+                    // Atualiza a data de modificação
+                    ticket.updatedAt = new Date();
+                    // Salva no localStorage para persistir
+                    saveTicketsToStorage();
+                    // Recarrega o dashboard para mostrar as mudanças
+                    loadAdminDashboard();
+                }
+            }
+        }
+
+        /**
+         * Permite ao admin excluir qualquer chamado permanentemente
+         * Confirma a ação e remove o chamado da lista
+         */
+        function adminDeleteTicket(ticketId) {
+            if (confirm('Tem certeza que deseja excluir este chamado permanentemente?')) {
+                // Remove o chamado da lista (futuramente excluirá do Supabase)
+                tickets = tickets.filter(t => t.id !== ticketId);
+                // Salva no localStorage para persistir
+                saveTicketsToStorage();
+                // Recarrega o dashboard para mostrar as mudanças
+                loadAdminDashboard();
+            }
+        }
+
+        // ========== GERAÇÃO DE RELATÓRIOS ==========
+        
+        /**
+         * Gera relatório em PDF dos chamados finalizados
+         * Filtra por período (semanal ou mensal) e cria PDF com jsPDF
+         */
+        function generateReport(period) {
+            // Filtra apenas chamados finalizados
+            const closedTickets = tickets.filter(t => t.status === 'closed');
+            const now = new Date();
+            let filteredTickets = [];
+            
+            // Define o período do relatório
+            if (period === 'weekly') {
+                // Últimos 7 dias
+                const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                filteredTickets = closedTickets.filter(t => t.updatedAt >= weekAgo);
+            } else {
+                // Últimos 30 dias
+                const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                filteredTickets = closedTickets.filter(t => t.updatedAt >= monthAgo);
+            }
+            
+            // Cria um novo documento PDF usando jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Configurações do PDF
+            let yPosition = 20; // Posição vertical inicial
+            const lineHeight = 10; // Altura entre linhas
+            const pageHeight = doc.internal.pageSize.height; // Altura da página
+            
+            // ===== CABEÇALHO DO RELATÓRIO =====
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text(`RELATÓRIO ${period === 'weekly' ? 'SEMANAL' : 'MENSAL'} - TI HELP DESK`, 20, yPosition);
+            yPosition += 15;
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Gerado em: ${now.toLocaleString('pt-BR')}`, 20, yPosition);
+            yPosition += 20;
+            
+            // ===== RESUMO ESTATÍSTICO =====
+            doc.setFont(undefined, 'bold');
+            doc.text('RESUMO:', 20, yPosition);
+            yPosition += lineHeight;
+            
+            doc.setFont(undefined, 'normal');
+            doc.text(`- Chamados finalizados no período: ${filteredTickets.length}`, 20, yPosition);
+            yPosition += lineHeight;
+            doc.text(`- Total de chamados finalizados: ${closedTickets.length}`, 20, yPosition);
+            yPosition += 20;
+            
+            // ===== DETALHES DOS CHAMADOS =====
+            if (filteredTickets.length > 0) {
+                doc.setFont(undefined, 'bold');
+                doc.text('DETALHES DOS CHAMADOS:', 20, yPosition);
+                yPosition += 15;
+                
+                // Loop através de cada chamado finalizado no período
+                filteredTickets.forEach((ticket, index) => {
+                    // Verifica se precisa de nova página
+                    if (yPosition > pageHeight - 60) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${index + 1}. Protocolo: ${ticket.protocol}`, 20, yPosition);
+                    yPosition += lineHeight;
+                    
+                    doc.setFont(undefined, 'normal');
+                    doc.text(`   Solicitante: ${ticket.requesterName || 'Não informado'}`, 20, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`   Cliente: ${ticket.user.name}`, 20, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`   Usuário: ${ticket.user.username}`, 20, yPosition);
+                    yPosition += lineHeight;
+                    doc.text(`   Serviços: ${ticket.services.join(', ') || 'Nenhum'}`, 20, yPosition);
+                    yPosition += lineHeight;
+                    
+                    // Quebra descrição em múltiplas linhas se necessário
+                    if (ticket.description) {
+                        const description = ticket.description.length > 60 
+                            ? ticket.description.substring(0, 60) + '...' 
+                            : ticket.description;
+                        doc.text(`   Descrição: ${description}`, 20, yPosition);
+                        yPosition += lineHeight;
+                    }
+                    
+                    doc.text(`   Finalizado em: ${ticket.updatedAt.toLocaleString('pt-BR')}`, 20, yPosition);
+                    yPosition += 15; // Espaço extra entre chamados
+                });
+            } else {
+                doc.setFont(undefined, 'normal');
+                doc.text('Nenhum chamado foi finalizado no período selecionado.', 20, yPosition);
+                yPosition += 20;
+            }
+            
+            // ===== CAMPO DE ASSINATURA =====
+            // Verifica se precisa de nova página para a assinatura
+            if (yPosition > pageHeight - 80) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            
+            yPosition += 20; // Espaço antes da assinatura
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('ASSINATURA:', 20, yPosition);
+            yPosition += 20;
+            
+            doc.setFont(undefined, 'normal');
+            doc.text('Responsável Técnico: ________________________________', 20, yPosition);
+            yPosition += 15;
+            doc.text('Data: ___/___/______', 20, yPosition);
+            yPosition += 15;
+            doc.text('Assinatura: ________________________________', 20, yPosition);
+            yPosition += 25;
+            
+            // ===== INFORMAÇÕES DA EMPRESA =====
+            doc.setFont(undefined, 'bold');
+            doc.text('DADOS DA EMPRESA:', 20, yPosition);
+            yPosition += 15;
+            
+            doc.setFont(undefined, 'normal');
+            doc.text('TI Help Desk - Sistema de Suporte Técnico', 20, yPosition);
+            yPosition += 10;
+            doc.text('CNPJ: 54.677.769/0001-78', 20, yPosition);
+            yPosition += 10;
+            doc.text('Email: lfragozo563@gmail.com', 20, yPosition);
+            yPosition += 10;
+            doc.text('Celular: 51 99352-5004', 20, yPosition);
+            
+            // ===== SALVAR O PDF =====
+            const fileName = `relatorio_${period}_${now.toISOString().split('T')[0]}.pdf`;
+            doc.save(fileName);
+            
+            // Confirma que o relatório foi gerado
+            alert(`Relatório ${period === 'weekly' ? 'semanal' : 'mensal'} em PDF gerado com sucesso!`);
+        }
+
+        // ========== SISTEMA DE PERSISTÊNCIA ==========
+        
+        /**
+         * Salva os chamados no localStorage para persistir após refresh
+         */
+        function saveTicketsToStorage() {
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            localStorage.setItem('ticketCounter', ticketCounter.toString());
+        }
+
+        /**
+         * Carrega os chamados do localStorage
+         */
+        function loadTicketsFromStorage() {
+            const savedTickets = localStorage.getItem('tickets');
+            const savedCounter = localStorage.getItem('ticketCounter');
+            
+            if (savedTickets) {
+                tickets = JSON.parse(savedTickets);
+                // Converte strings de data de volta para objetos Date
+                tickets.forEach(ticket => {
+                    ticket.createdAt = new Date(ticket.createdAt);
+                    ticket.updatedAt = new Date(ticket.updatedAt);
+                });
+            }
+            
+            if (savedCounter) {
+                ticketCounter = parseInt(savedCounter);
+            }
+        }
+
+        /**
+         * Verifica se há usuário logado salvo no localStorage
+         */
+        function checkSavedLogin() {
+            // Verifica login do usuário
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                document.getElementById('currentUserName').textContent = currentUser.name;
+                document.getElementById('userLogin').style.display = 'none';
+                document.getElementById('userDashboard').style.display = 'block';
+                loadUserTickets();
+            }
+            
+            // Verifica login do admin
+            const savedAdmin = localStorage.getItem('currentAdmin');
+            if (savedAdmin) {
+                currentAdmin = JSON.parse(savedAdmin);
+                document.getElementById('adminLogin').style.display = 'none';
+                document.getElementById('adminDashboard').style.display = 'block';
+                loadAdminDashboard();
+                // Muda para o painel do admin se estiver logado
+                showPanel('admin');
+            }
+        }
+
+        // ========== INICIALIZAÇÃO DO SISTEMA ==========
+        
+        // ========== INSTRUÇÕES DE CONFIGURAÇÃO DO SUPABASE ==========
+        /*
+        PARA CONFIGURAR O SUPABASE:
+
+        1. Crie uma conta em https://supabase.com
+        2. Crie um novo projeto
+        3. Vá em Settings > API e copie:
+           - Project URL (substitua SUPABASE_URL)
+           - anon/public key (substitua SUPABASE_ANON_KEY)
+
+        4. Execute estes comandos SQL no SQL Editor do Supabase:
+
+        -- Tabela de usuários
+        CREATE TABLE users (
+            id SERIAL PRIMARY KEY,
+            username VARCHAR(50) UNIQUE NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            role VARCHAR(20) NOT NULL CHECK (role IN ('user', 'admin')),
+            created_at TIMESTAMP DEFAULT NOW()
+        );
+
+        -- Tabela de chamados
+        CREATE TABLE tickets (
+            id SERIAL PRIMARY KEY,
+            protocol VARCHAR(20) UNIQUE NOT NULL,
+            user_id INTEGER REFERENCES users(id),
+            requester_name VARCHAR(100) NOT NULL,
+            services TEXT[],
+            description TEXT,
+            status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'in-progress', 'closed')),
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+        );
+
+        -- Inserir usuários padrão
+        INSERT INTO users (username, name, role) VALUES 
+        ('user', 'Usuário do Sistema', 'user'),
+        ('admin', 'Administrador do Sistema', 'admin');
+
+        5. Descomente as linhas do Supabase no código
+        6. Remova o fallback local
+        */
+
+        /**
+         * Executa quando a página termina de carregar
+         * Inicializa o sistema e prepara os dados de exemplo
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carrega dados salvos do localStorage
+            loadTicketsFromStorage();
+            // Verifica se há usuário logado
+            checkSavedLogin();
+            
+            // Log de inicialização
+            console.log('Sistema de Suporte TI inicializado com sucesso');
+            console.log('Dados carregados do localStorage');
+            console.log('Para usar Supabase, configure as credenciais no topo do arquivo');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98779db425b5f905',t:'MTc1OTI3NjE1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

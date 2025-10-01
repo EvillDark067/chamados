@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TI Help Desk - Supabase</title>
+  <style>
+    /* --- seu CSS (preservado / otimizado) --- */
+    body { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#121212; color:#f5f5f5; line-height:1.6; }
+    * { box-sizing:border-box; }
+    .container { max-width:1200px; margin:0 auto; padding:20px; }
+    .header { background:linear-gradient(135deg,#1e1e1e,#2d2d2d); padding:20px 0; text-align:center; margin-bottom:30px; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3); }
+    .header h1 { margin:0; color:#4CAF50; font-size:2.5rem; }
+    .header p { margin:10px 0 0; color:#b0b0b0; }
+    .panel-selector { display:flex; justify-content:center; gap:20px; margin-bottom:30px; }
+    .panel-btn { background:linear-gradient(135deg,#333,#444); color:#f5f5f5; border:none; padding:15px 30px; border-radius:8px; cursor:pointer; font-size:1.1rem; transition:all .3s; box-shadow:0 2px 10px rgba(0,0,0,.2); }
+    .panel-btn:hover { background:linear-gradient(135deg,#4CAF50,#45a049); transform:translateY(-2px); }
+    .panel-btn.active { background:linear-gradient(135deg,#4CAF50,#45a049); }
+    .panel { display:none; background:#1e1e1e; border-radius:10px; padding:30px; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+    .panel.active { display:block; }
+    .form-group { margin-bottom:20px; }
+    .form-group label { display:block; margin-bottom:8px; color:#f5f5f5; font-weight:500; }
+    .form-group input, .form-group textarea, .form-group select { width:100%; padding:12px; background:#2d2d2d; border:1px solid #444; border-radius:6px; color:#f5f5f5; font-size:1rem; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline:none; border-color:#4CAF50; box-shadow:0 0 0 2px rgba(76,175,80,0.2); }
+    .checkbox-group { background:#2d2d2d; padding:20px; border-radius:8px; margin-bottom:20px; }
+    .checkbox-group h3 { margin-top:0; color:#4CAF50; }
+    .checkbox-item { display:flex; align-items:center; margin-bottom:10px; gap:10px; }
+    .checkbox-item input[type="checkbox"] { transform:scale(1.15); }
+    .btn { background:linear-gradient(135deg,#4CAF50,#45a049); color:white; border:none; padding:12px 25px; border-radius:6px; cursor:pointer; font-size:1rem; transition:all .3s; margin-right:10px; margin-bottom:10px; }
+    .btn:hover { transform:translateY(-1px); }
+    .btn-danger { background:linear-gradient(135deg,#f44336,#d32f2f); }
+    .btn-warning { background:linear-gradient(135deg,#ff9800,#f57c00); }
+    .ticket-card { background:#2d2d2d; border-radius:8px; padding:20px; margin-bottom:15px; border-left:4px solid #4CAF50; }
+    .ticket-card.closed { border-left-color:#666; opacity:0.85; }
+    .ticket-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px; flex-wrap:wrap; }
+    .ticket-protocol { font-weight:700; color:#4CAF50; font-size:1.05rem; }
+    .ticket-status { padding:6px 12px; border-radius:20px; font-size:.9rem; font-weight:600; }
+    .status-open { background:#4CAF50; color:#fff; }
+    .status-in-progress { background:#ff9800; color:#fff; }
+    .status-closed { background:#666; color:#fff; }
+    .dashboard { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-bottom:30px; }
+    .dashboard-card { background:linear-gradient(135deg,#2d2d2d,#3d3d3d); padding:25px; border-radius:10px; text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.2); }
+    .dashboard-card h3 { margin:0 0 10px 0; color:#4CAF50; }
+    .dashboard-card .number { font-size:2.2rem; font-weight:700; color:#f5f5f5; }
+    .tabs { display:flex; margin-bottom:20px; border-bottom:1px solid #444; gap:8px; flex-wrap:wrap; }
+    .tab { background:none; border:none; color:#b0b0b0; padding:12px 18px; cursor:pointer; font-size:1rem; transition:all .2s; }
+    .tab.active { color:#4CAF50; border-bottom:2px solid #4CAF50; }
+    .tab:hover { color:#f5f5f5; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .login-form { max-width:420px; margin:0 auto; }
+    .small { font-size:.9rem; color:#b0b0b0; }
+    footer { background:#1e1e1e; padding:30px 0; margin-top:50px; border-top:1px solid #444; text-align:center; color:#888; }
+    @media (max-width:768px) { .container{padding:12px;} .panel-selector{flex-direction:column;align-items:center;} .header h1{font-size:2rem;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🛠️ TI Help Desk</h1>
+      <p>Sistema de Suporte Técnico</p>
+    </div>
+
+    <div class="panel-selector">
+      <button class="panel-btn active" onclick="showPanel('user')">Painel do Usuário</button>
+      <button class="panel-btn" onclick="showPanel('admin')">Painel do Admin</button>
+    </div>
+
+    <!-- USER PANEL -->
+    <div id="userPanel" class="panel active">
+      <div id="userLogin">
+        <h2>Acesso do Usuário</h2>
+        <div class="login-form">
+          <div class="form-group">
+            <label for="userLoginName">Usuário (use seu e-mail cadastrado ou username):</label>
+            <input id="userLoginName" type="text" placeholder="ex: user@helpdesk.local ou user" />
+          </div>
+          <div class="form-group">
+            <label for="userPassword">Senha:</label>
+            <input id="userPassword" type="password" placeholder="user123" />
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;">
+            <button class="btn" onclick="userLogin()">Entrar</button>
+            <button class="btn" onclick="showCreateAccount('user')">Criar conta</button>
+          </div>
+          <p class="small">Obs: este sistema usa <strong>Supabase Auth</strong>. Para logar é necessário ter a conta criada no Auth.</p>
+        </div>
+      </div>
+
+      <div id="userDashboard" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap;">
+          <h2>Bem-vindo, <span id="currentUserName"></span>!</h2>
+          <div>
+            <button class="btn btn-danger" onclick="userLogout()">Sair</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="showUserTab('newTicket')">Novo Chamado</button>
+          <button class="tab" onclick="showUserTab('myTickets')">Meus Chamados</button>
+        </div>
+
+        <div id="newTicketTab" class="tab-content active">
+          <h3>Abrir Novo Chamado</h3>
+          <form id="ticketForm">
+            <div class="form-group">
+              <label for="requesterName">Nome do Solicitante:</label>
+              <input id="requesterName" type="text" placeholder="Nome completo" required />
+            </div>
+
+            <div class="checkbox-group">
+              <h3>Selecione os serviços necessários:</h3>
+              <div class="checkbox-item"><input type="checkbox" value="Instalar impressora remoto" /> <label>Instalar impressora remoto</label></div>
+              <div class="checkbox-item"><input type="checkbox" value="Instalar um programa remoto" /> <label>Instalar um programa remoto</label></div>
+              <div class="checkbox-item"><input type="checkbox" value="Formatação de notebook ou computador + configuração" /> <label>Formatação de notebook ou computador + configuração</label></div>
+              <div class="checkbox-item"><input type="checkbox" value="Configuração de notebook" /> <label>Configuração de notebook</label></div>
+              <div class="checkbox-item"><input type="checkbox" value="Suporte no local" /> <label>Suporte no local</label></div>
+            </div>
+
+            <div class="form-group">
+              <label for="problemDescription">Descrição do problema:</label>
+              <textarea id="problemDescription" rows="5" placeholder="Descreva detalhadamente..."></textarea>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+              <button type="submit" class="btn">Abrir Chamado</button>
+              <button type="button" class="btn" onclick="document.getElementById('ticketForm').reset()">Limpar</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="myTicketsTab" class="tab-content">
+          <h3>Meus Chamados</h3>
+          <div id="userTicketsList">Carregando...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="panel">
+      <div id="adminLogin">
+        <h2>Acesso do Administrador</h2>
+        <div class="login-form">
+          <div class="form-group"><label for="adminUser">Usuário:</label><input id="adminUser" type="text" placeholder="ex: admin@helpdesk.local ou admin" /></div>
+          <div class="form-group"><label for="adminPass">Senha:</label><input id="adminPass" type="password" placeholder="admin123" /></div>
+          <div style="display:flex;gap:10px;justify-content:center;">
+            <button class="btn" onclick="adminLogin()">Entrar</button>
+            <button class="btn" onclick="showCreateAccount('admin')">Criar conta admin</button>
+          </div>
+          <p class="small">Obs: admin deve ter role = 'admin' na tabela <code>users</code> e também uma conta no Auth.</p>
+        </div>
+      </div>
+
+      <div id="adminDashboard" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap;">
+          <h2>Painel Administrativo</h2>
+          <div>
+            <button class="btn btn-danger" onclick="adminLogout()">Sair</button>
+          </div>
+        </div>
+
+        <div class="dashboard">
+          <div class="dashboard-card"><h3>Chamados Abertos</h3><div class="number" id="openTicketsCount">0</div></div>
+          <div class="dashboard-card"><h3>Chamados Finalizados</h3><div class="number" id="closedTicketsCount">0</div></div>
+          <div class="dashboard-card"><h3>Total de Chamados</h3><div class="number" id="totalTicketsCount">0</div></div>
+        </div>
+
+        <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" onclick="generateReport('weekly')">Relatório Semanal (PDF)</button>
+          <button class="btn" onclick="generateReport('monthly')">Relatório Mensal (PDF)</button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="showAdminTab('openTickets')">Chamados Abertos</button>
+          <button class="tab" onclick="showAdminTab('closedTickets')">Chamados Finalizados</button>
+        </div>
+
+        <div id="openTicketsTab" class="tab-content active">
+          <h3>Chamados Abertos / Em Andamento</h3>
+          <div id="openTicketsList">Carregando...</div>
+        </div>
+
+        <div id="closedTicketsTab" class="tab-content">
+          <h3>Chamados Finalizados</h3>
+          <div id="closedTicketsList">Carregando...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div style="text-align:center;color:#b0b0b0;">
+        <h3 style="color:#4CAF50;margin-bottom:10px;">📞 Informações de Contato</h3>
+        <div class="small">Email: lfragozo563@gmail.com • Celular: 51 99352-5004 • CNPJ: 54.677.769/0001-78</div>
+        <div style="margin-top:14px;color:#888;">© 2024 TI Help Desk</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // ========== CONFIGURAÇÃO SUPABASE ==========
+    // Substitua antes de usar:
+    const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
+    const SUPABASE_ANON_KEY = "SUA-CHAVE-ANON";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ========== ESTADO ==========
+    let currentUser = null;   // profile (linha da tabela users)
+    let currentAuthUser = null; // usuário vindo do Supabase Auth (id, email)
+    let currentAdmin = null;
+
+    // ========== UI Helpers ==========
+    function showPanel(panel) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.panel-btn').forEach(b => b.classList.remove('active'));
+      if (panel === 'user') {
+        document.getElementById('userPanel').classList.add('active');
+        document.querySelector('[onclick="showPanel(\'user\')"]').classList.add('active');
+      } else {
+        document.getElementById('adminPanel').classList.add('active');
+        document.querySelector('[onclick="showPanel(\'admin\')"]').classList.add('active');
+      }
+    }
+    function showUserTab(tab) {
+      document.querySelectorAll('#userDashboard .tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#userDashboard .tab-content').forEach(tc => tc.classList.remove('active'));
+      document.querySelector(`[onclick="showUserTab('${tab}')"]`).classList.add('active');
+      document.getElementById(tab + 'Tab').classList.add('active');
+      if (tab === 'myTickets') loadUserTickets();
+    }
+    function showAdminTab(tab) {
+      document.querySelectorAll('#adminDashboard .tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#adminDashboard .tab-content').forEach(tc => tc.classList.remove('active'));
+      document.querySelector(`[onclick="showAdminTab('${tab}')"]`).classList.add('active');
+      document.getElementById(tab + 'Tab').classList.add('active');
+      loadAdminTickets();
+    }
+
+    // ========== AUTENTICAÇÃO e SESSÃO ==========
+    // Tenta recuperar sessão ativa
+    async function tryRestoreSession() {
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (session?.user) {
+        currentAuthUser = session.user;
+        // assume email format username@helpdesk.local ou email real
+        await loadProfileByAuth(currentAuthUser);
+      }
+    }
+
+    // Carrega perfil "users" a partir do usuário Auth (por e-mail) ou username
+    async function loadProfileByAuth(authUser) {
+      // tenta buscar perfil usando e-mail (se tiver username armazenado como email)
+      const email = authUser.email || '';
+      // Se email tem formato user@helpdesk.local, extrai "user" e tenta também por username
+      let profile = null;
+      // 1) buscar por email no campo username (caso user tenha usado email como username)
+      if (email) {
+        const usernameGuess = email.split('@')[0];
+        const { data, error } = await supabase.from('users').select('*').or(`username.eq.${usernameGuess},username.eq.${email}`).limit(1).maybeSingle();
+        if (!error && data) profile = data;
+      }
+      // 2) fallback: buscar por auth id (se você armazenou auth_id em users)
+      if (!profile) {
+        const { data, error } = await supabase.from('users').select('*').eq('auth_id', authUser.id).limit(1).maybeSingle();
+        if (!error && data) profile = data;
+      }
+      if (profile) {
+        // Define se é admin ou user
+        currentUser = profile;
+        if (profile.role === 'admin') {
+          currentAdmin = profile;
+          showAdminDashboardUI();
+        } else {
+          showUserDashboardUI();
+        }
+      }
+    }
+
+    // Criar conta via Auth + perfil (para conveniência do seu uso inicial)
+    // O email será usado para autenticação. username é campo na tabela users.
+    async function showCreateAccount(role = 'user') {
+      const email = prompt('Informe o e-mail para criar (ex: user@helpdesk.local):');
+      if (!email) return alert('E-mail obrigatório.');
+      const username = prompt('Informe um username (ex: user):');
+      if (!username) return alert('Username obrigatório.');
+      const name = prompt('Nome completo:') || username;
+      const password = prompt('Senha (mín 6 caracteres):') || '';
+      if (password.length < 6) return alert('Senha deve ter pelo menos 6 caracteres.');
+
+      // 1) cria usuário no Auth
+      const { data: signData, error: signErr } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true
+      }).catch(e => ({ error: e }));
+      if (signErr) {
+        console.error(signErr);
+        return alert('Erro ao criar usuário no Auth: ' + (signErr.message || JSON.stringify(signErr)));
+      }
+
+      // 2) cria perfil na tabela users
+      const { data, error } = await supabase.from('users').insert([{
+        username,
+        name,
+        role,
+        auth_id: signData.user.id
+      }]).select().single();
+      if (error) {
+        console.error(error);
+        return alert('Erro ao criar perfil: ' + (error.message || JSON.stringify(error)));
+      }
+
+      alert(`Conta criada com sucesso! E-mail: ${email} — role: ${role}. Agora faça login.`);
+    }
+
+    // LOGIN USER
+    async function userLogin() {
+      const userInput = document.getElementById('userLoginName').value.trim();
+      const password = document.getElementById('userPassword').value.trim();
+      if (!userInput || !password) return alert('Preencha usuário e senha.');
+      // transform input into email if user typed only username
+      const email = userInput.includes('@') ? userInput : `${userInput}@helpdesk.local`;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password }).catch(e => ({ error: e }));
+      if (error || !data.session) {
+        console.error(error);
+        return alert('Erro no login. Verifique usuário/senha.');
+      }
+      currentAuthUser = data.user;
+      // carregar profile
+      await loadProfileByAuth(currentAuthUser);
+      if (currentUser && currentUser.role === 'user') {
+        showUserDashboardUI();
+      } else {
+        alert('Conta não tem role "user" na tabela users.');
+      }
+    }
+
+    // LOGIN ADMIN
+    async function adminLogin() {
+      const userInput = document.getElementById('adminUser').value.trim();
+      const password = document.getElementById('adminPass').value.trim();
+      if (!userInput || !password) return alert('Preencha usuário e senha.');
+      const email = userInput.includes('@') ? userInput : `${userInput}@helpdesk.local`;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password }).catch(e => ({ error: e }));
+      if (error || !data.session) {
+        console.error(error);
+        return alert('Erro no login admin. Verifique usuário/senha.');
+      }
+      currentAuthUser = data.user;
+      await loadProfileByAuth(currentAuthUser);
+      if (currentUser && currentUser.role === 'admin') {
+        currentAdmin = currentUser;
+        showAdminDashboardUI();
+      } else {
+        alert('Conta não tem role "admin" na tabela users.');
+      }
+    }
+
+    // LOGOUT (user)
+    async function userLogout() {
+      await supabase.auth.signOut();
+      currentUser = null; currentAuthUser = null;
+      document.getElementById('userLogin').style.display = 'block';
+      document.getElementById('userDashboard').style.display = 'none';
+      showPanel('user');
+    }
+
+    // LOGOUT (admin)
+    async function adminLogout() {
+      await supabase.auth.signOut();
+      currentAdmin = null; currentUser = null; currentAuthUser = null;
+      document.getElementById('adminLogin').style.display = 'block';
+      document.getElementById('adminDashboard').style.display = 'none';
+      showPanel('admin');
+    }
+
+    // mostra UI user logado
+    function showUserDashboardUI() {
+      document.getElementById('userLogin').style.display = 'none';
+      document.getElementById('userDashboard').style.display = 'block';
+      document.getElementById('currentUserName').textContent = currentUser?.name || currentAuthUser?.email || 'Usuário';
+      showPanel('user');
+      loadUserTickets();
+    }
+
+    // mostra UI admin logado
+    function showAdminDashboardUI() {
+      document.getElementById('adminLogin').style.display = 'none';
+      document.getElementById('adminDashboard').style.display = 'block';
+      showPanel('admin');
+      loadAdminDashboard();
+    }
+
+    // ========== CHAMADOS: CRIAR / LISTAR / ATUALIZAR / DELETAR ==========
+    // criar chamado (inserir no supabase)
+    document.getElementById('ticketForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!currentUser) return alert('Você precisa estar logado para criar chamado.');
+
+      const requesterName = document.getElementById('requesterName').value.trim();
+      const services = Array.from(document.querySelectorAll('.checkbox-group input[type="checkbox"]'))
+        .filter(cb => cb.checked).map(cb => cb.value);
+      const description = document.getElementById('problemDescription').value.trim();
+
+      if (!requesterName) return alert('Informe o nome do solicitante.');
+
+      const protocol = await generateProtocol();
+
+      const payload = {
+        protocol,
+        user_id: currentUser.id,
+        requester_name: requesterName,
+        services,
+        description,
+        status: 'open'
+      };
+
+      const { data, error } = await supabase.from('tickets').insert([payload]).select().single();
+      if (error) { console.error(error); return alert('Erro ao criar chamado.'); }
+      alert(`Chamado ${data.protocol} criado com sucesso!`);
+      // limpar formulário
+      document.getElementById('ticketForm').reset();
+      showUserTab('myTickets');
+    });
+
+    // gera protocolo CH-0001 crescente (busca último protocolo no banco)
+    async function generateProtocol() {
+      // pega o maior id atual ou o último protocol baseado em created_at
+      const { data, error } = await supabase.from('tickets').select('protocol').order('id', { ascending: false }).limit(1).maybeSingle();
+      if (!error && data && data.protocol) {
+        // extraí número se estiver no formato CH-XXXX
+        const match = (data.protocol || '').match(/CH-(\d+)/);
+        if (match) {
+          const next = parseInt(match[1], 10) + 1;
+          return `CH-${String(next).padStart(4, '0')}`;
+        }
+      }
+      // fallback
+      const random = Math.floor(Math.random() * 9000) + 1000;
+      return `CH-${String(random).padStart(4, '0')}`;
+    }
+
+    // carregar chamados do usuário logado
+    async function loadUserTickets() {
+      if (!currentUser) {
+        document.getElementById('userTicketsList').innerHTML = '<p>Faça login para ver seus chamados.</p>';
+        return;
+      }
+      document.getElementById('userTicketsList').innerHTML = 'Carregando...';
+      const { data, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error(error);
+        document.getElementById('userTicketsList').innerHTML = '<p>Erro ao carregar chamados.</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        document.getElementById('userTicketsList').innerHTML = '<p>Você ainda não possui chamados.</p>';
+        return;
+      }
+
+      const html = data.map(ticket => renderTicketCardForUser(ticket)).join('');
+      document.getElementById('userTicketsList').innerHTML = html;
+    }
+
+    function renderTicketCardForUser(ticket) {
+      const statusClass = ticket.status === 'open' ? 'status-open' : ticket.status === 'in-progress' ? 'status-in-progress' : 'status-closed';
+      const created = ticket.created_at ? new Date(ticket.created_at).toLocaleString('pt-BR') : '-';
+      const updated = ticket.updated_at ? new Date(ticket.updated_at).toLocaleString('pt-BR') : '-';
+      return `
+        <div class="ticket-card ${ticket.status === 'closed' ? 'closed' : ''}">
+          <div class="ticket-header">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <span class="ticket-protocol">${ticket.protocol}</span>
+              <span class="ticket-status ${statusClass}">${ticket.status === 'open' ? 'Aberto' : ticket.status === 'in-progress' ? 'Em Andamento' : 'Finalizado'}</span>
+            </div>
+            <div class="small">${created}</div>
+          </div>
+          <div><strong>Solicitante:</strong> ${escapeHtml(ticket.requester_name || '')}</div>
+          <div><strong>Serviços:</strong> ${Array.isArray(ticket.services) ? escapeHtml(ticket.services.join(', ')) : ''}</div>
+          <div><strong>Descrição:</strong> ${escapeHtml(ticket.description || '')}</div>
+          <div style="margin-top:12px;">
+            ${ticket.status === 'open' ? `<button class="btn btn-danger" onclick="deleteOwnTicket(${ticket.id})">Excluir Chamado</button>` : ''}
+          </div>
+          ${ticket.status === 'closed' ? `<div class="small" style="margin-top:10px;"><strong>Finalizado em:</strong> ${updated}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // permite usuário excluir seu próprio chamado (somente se estiver aberto)
+    async function deleteOwnTicket(ticketId) {
+      if (!confirm('Tem certeza que deseja excluir este chamado?')) return;
+      // verificar se o ticket pertence a currentUser
+      const { data: ticket, error: getErr } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
+      if (getErr || !ticket) return alert('Chamado não encontrado.');
+      if (ticket.user_id !== currentUser.id) return alert('Você só pode excluir seus próprios chamados.');
+      if (ticket.status !== 'open') return alert('Somente chamados abertos podem ser excluídos.');
+      const { error } = await supabase.from('tickets').delete().eq('id', ticketId);
+      if (error) { console.error(error); return alert('Erro ao excluir chamado.'); }
+      alert('Chamado excluído com sucesso.');
+      loadUserTickets();
+      loadAdminDashboard(); // atualizar dashboard caso admin também esteja vendo
+    }
+
+    // ========== ADMIN: carregar listas e ações ==========
+    async function loadAdminDashboard() {
+      document.getElementById('openTicketsCount').textContent = '...';
+      document.getElementById('closedTicketsCount').textContent = '...';
+      document.getElementById('totalTicketsCount').textContent = '...';
+      // busca contagem
+      const { data, error } = await supabase.from('tickets').select('*').order('created_at', { ascending: false });
+      if (error) { console.error(error); return; }
+      const open = data.filter(t => t.status !== 'closed').length;
+      const closed = data.filter(t => t.status === 'closed').length;
+      document.getElementById('openTicketsCount').textContent = open;
+      document.getElementById('closedTicketsCount').textContent = closed;
+      document.getElementById('totalTicketsCount').textContent = data.length;
+      loadAdminTickets();
+    }
+
+    async function loadAdminTickets() {
+      document.getElementById('openTicketsList').innerHTML = 'Carregando...';
+      document.getElementById('closedTicketsList').innerHTML = 'Carregando...';
+      // busca tickets (join users para mostrar nome do cliente, se referencial estiver configurado)
+      // Aqui usamos select simples e depois buscamos username via user_id (if needed)
+      const { data, error } = await supabase.from('tickets').select('*').order('created_at', { ascending: false });
+      if (error) { console.error(error); document.getElementById('openTicketsList').innerHTML = '<p>Erro ao carregar.</p>'; return; }
+      const openTickets = data.filter(t => t.status !== 'closed');
+      const closedTickets = data.filter(t => t.status === 'closed');
+
+      document.getElementById('openTicketsList').innerHTML = openTickets.length ? openTickets.map(t => renderTicketCardForAdmin(t)).join('') : '<p>Nenhum chamado aberto no momento.</p>';
+      document.getElementById('closedTicketsList').innerHTML = closedTickets.length ? closedTickets.map(t => renderTicketCardForAdmin(t)).join('') : '<p>Nenhum chamado finalizado ainda.</p>';
+    }
+
+    function renderTicketCardForAdmin(ticket) {
+      const statusClass = ticket.status === 'open' ? 'status-open' : ticket.status === 'in-progress' ? 'status-in-progress' : 'status-closed';
+      const created = ticket.created_at ? new Date(ticket.created_at).toLocaleString('pt-BR') : '-';
+      const updated = ticket.updated_at ? new Date(ticket.updated_at).toLocaleString('pt-BR') : '-';
+      return `
+        <div class="ticket-card ${ticket.status === 'closed' ? 'closed' : ''}">
+          <div class="ticket-header">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <span class="ticket-protocol">${ticket.protocol}</span>
+              <span class="ticket-status ${statusClass}">${ticket.status === 'open' ? 'Aberto' : ticket.status === 'in-progress' ? 'Em Andamento' : 'Finalizado'}</span>
+            </div>
+            <div class="small">${created}</div>
+          </div>
+          <div><strong>Solicitante:</strong> ${escapeHtml(ticket.requester_name || '')}</div>
+          <div><strong>Serviços:</strong> ${Array.isArray(ticket.services) ? escapeHtml(ticket.services.join(', ')) : ''}</div>
+          <div><strong>Descrição:</strong> ${escapeHtml(ticket.description || '')}</div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            ${ticket.status === 'open' ? `<button class="btn btn-warning" onclick="startTicket(${ticket.id})">Iniciar Atendimento</button>` : ''}
+            ${ticket.status !== 'closed' ? `<button class="btn" onclick="closeTicket(${ticket.id})">Finalizar Chamado</button>` : ''}
+            <button class="btn btn-danger" onclick="adminDeleteTicket(${ticket.id})">Excluir</button>
+          </div>
+          ${ticket.status === 'closed' ? `<div class="small" style="margin-top:10px;"><strong>Finalizado em:</strong> ${updated}</div>` : ''}
+        </div>
+      `;
+    }
+
+    // iniciar atendimento -> status = in-progress
+    async function startTicket(ticketId) {
+      const { data: ticket, error: gerr } = await supabase.from('tickets').select('*').eq('id', ticketId).single();
+      if (gerr || !ticket) return alert('Chamado não encontrado.');
+      const { error } = await supabase.from('tickets').update({ status: 'in-progress', updated_at: new Date().toISOString() }).eq('id', ticketId);
+      if (error) { console.error(error); return alert('Erro ao atualizar chamado.'); }
+      loadAdminDashboard();
+      loadUserTickets();
+    }
+
+    // finalizar chamado -> status = closed
+    async function closeTicket(ticketId) {
+      if (!confirm('Tem certeza que deseja finalizar este chamado?')) return;
+      const { error } = await supabase.from('tickets').update({ status: 'closed', updated_at: new Date().toISOString() }).eq('id', ticketId);
+      if (error) { console.error(error); return alert('Erro ao finalizar chamado.'); }
+      loadAdminDashboard();
+      loadUserTickets();
+    }
+
+    // excluir (admin)
+    async function adminDeleteTicket(ticketId) {
+      if (!confirm('Tem certeza que deseja excluir este chamado permanentemente?')) return;
+      const { error } = await supabase.from('tickets').delete().eq('id', ticketId);
+      if (error) { console.error(error); return alert('Erro ao excluir chamado.'); }
+      alert('Chamado excluído.');
+      loadAdminDashboard();
+      loadUserTickets();
+    }
+
+    // ========== RELATÓRIOS (gera PDF via jsPDF a partir dos chamados fechados) ==========
+    async function generateReport(period) {
+      // period: 'weekly' ou 'monthly'
+      const now = new Date();
+      let since;
+      if (period === 'weekly') since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      else since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      const { data: closedTickets, error } = await supabase
+        .from('tickets')
+        .select('*')
+        .gte('updated_at', since.toISOString())
+        .eq('status', 'closed')
+        .order('updated_at', { ascending: false });
+
+      if (error) { console.error(error); return alert('Erro ao buscar chamados para relatório.'); }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 18;
+      const lineHeight = 8;
+      doc.setFontSize(16);
+      doc.text(`RELATÓRIO ${period === 'weekly' ? 'SEMANAL' : 'MENSAL'} - TI HELP DESK`, 14, y);
+      y += 10;
+      doc.setFontSize(10);
+      doc.text(`Gerado em: ${now.toLocaleString('pt-BR')}`, 14, y);
+      y += 12;
+      doc.setFontSize(12);
+      doc.text(`Total de chamados finalizados no período: ${closedTickets.length}`, 14, y);
+      y += 12;
+
+      if (closedTickets.length > 0) {
+        closedTickets.forEach((t, idx) => {
+          if (y > doc.internal.pageSize.height - 40) { doc.addPage(); y = 18; }
+          doc.setFontSize(11);
+          doc.text(`${idx + 1}. Protocolo: ${t.protocol} — Solicitante: ${t.requester_name}`, 14, y);
+          y += lineHeight;
+          const desc = t.description ? (t.description.length > 120 ? t.description.substring(0, 117) + '...' : t.description) : '-';
+          doc.setFontSize(10);
+          doc.text(`Serviços: ${Array.isArray(t.services) ? t.services.join(', ') : '-'} `, 14, y);
+          y += lineHeight;
+          doc.text(`Descrição: ${desc}`, 14, y);
+          y += lineHeight;
+          const fin = t.updated_at ? new Date(t.updated_at).toLocaleString('pt-BR') : '-';
+          doc.text(`Finalizado em: ${fin}`, 14, y);
+          y += (lineHeight + 6);
+        });
+      } else {
+        doc.text('Nenhum chamado finalizado no período selecionado.', 14, y);
+        y += 12;
+      }
+
+      // assinatura e dados
+      if (y > doc.internal.pageSize.height - 60) { doc.addPage(); y = 18; }
+      y += 8;
+      doc.text('ASSINATURA:', 14, y); y += 10;
+      doc.text('Responsável Técnico: ________________________________', 14, y); y += 8;
+      doc.text('Data: ___/___/______', 14, y); y += 8;
+
+      const fileName = `relatorio_${period}_${now.toISOString().split('T')[0]}.pdf`;
+      doc.save(fileName);
+      alert('Relatório gerado com sucesso.');
+    }
+
+    // ========== UTILITIES ==========
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return String(unsafe).replace(/[&<>"'`=\/]/g, function (s) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#96;','=':'&#61;'}[s];
+      });
+    }
+
+    // ========== INICIALIZAÇÃO ==========
+    document.addEventListener('DOMContentLoaded', async () => {
+      // restaura sessão se houver
+      try {
+        await tryRestoreSession();
+      } catch (e) {
+        console.warn('Não foi possível restaurar sessão:', e);
+      }
+      // inicial UI: caso não haja sessão, mostra painel user
+      showPanel('user');
+      // set up auth state change to update UI automaticamente
+      supabase.auth.onAuthStateChange((event, session) => {
+        // evento pode ser SIGNED_IN, SIGNED_OUT, etc.
+        if (event === 'SIGNED_OUT') {
+          currentUser = null; currentAuthUser = null; currentAdmin = null;
+          // reset UIs
+          document.getElementById('userLogin').style.display = 'block';
+          document.getElementById('userDashboard').style.display = 'none';
+          document.getElementById('adminLogin').style.display = 'block';
+          document.getElementById('adminDashboard').style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
