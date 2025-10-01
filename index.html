@@ -6,6 +6,8 @@
     <title>Sistema de Chamados T.I</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.js"></script>
+
     <style>
         body {
             box-sizing: border-box;
@@ -267,21 +269,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.js"></script>
 
-    <script>
-        // Configuração do Supabase
-const supabase = createClient('https://wrwyxhjbpysathipjlvk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indyd3l4aGpicHlzYXRoaXBqbHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzUzMTMsImV4cCI6MjA3NDg1MTMxM30.XLTxlzVgKFR1n-Krd7v7QhX6-bA8tJz4DGGw0pBAiRg');
 
+   <script>
+    // Configuração do Supabase
+const supabase = createClient(
+    'https://wrwyxhjbpysathipjlvk.supabase.co',  // Sua URL do Supabase
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indyd3l4aGpicHlzYXRoaXBqbHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyNzUzMTMsImV4cCI6MjA3NDg1MTMxM30.XLTxlzVgKFR1n-Krd7v7QhX6-bA8tJz4DGGw0pBAiRg'  // Sua chave API do Supabase
+);
+
+// Variáveis do DOM
 let currentUser = null;
-
-// Elementos DOM
 const loginScreen = document.getElementById('loginScreen');
 const adminDashboard = document.getElementById('adminDashboard');
 const clientDashboard = document.getElementById('clientDashboard');
-const themeToggle = document.getElementById('themeToggle');
-const logoutBtn = document.getElementById('logoutBtn');
 
 // Sistema de autenticação
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -291,18 +294,17 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         .from('users')
         .select('id, username, encrypted_password, type')
         .eq('username', username)
-        .single(); // Usamos 'single()' para garantir que retornamos apenas 1 usuário
+        .single(); // Garante que retorna um único usuário
 
     if (error) {
         alert('Erro ao buscar usuário: ' + error.message);
         return;
     }
 
-    // Verificar se o usuário existe e se a senha fornecida corresponde à senha armazenada
+    // Verificar se a senha fornecida é correta
     const isPasswordCorrect = await verifyPassword(password, user.encrypted_password);
 
     if (isPasswordCorrect) {
-        // Login bem-sucedido
         currentUser = user;
         loginScreen.classList.add('hidden');
 
@@ -318,30 +320,26 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     }
 });
 
-// Função para verificar a senha usando a função `crypt` do PostgreSQL
+// Função para verificar a senha criptografada
 async function verifyPassword(plainPassword, encryptedPassword) {
-    // No Supabase, a verificação da senha criptografada é feita comparando diretamente com o hash
     const { data, error } = await supabase
         .rpc('verify_password', { password: plainPassword, encrypted_password: encryptedPassword });
-    return data.is_valid; // Esperamos que a função 'verify_password' retorne um booleano
+
+    if (error) {
+        console.error('Erro ao verificar a senha:', error);
+        return false;
+    }
+
+    return data.is_valid;  // Retorna true ou false dependendo do resultado
 }
 
-
 // Logout
-logoutBtn.addEventListener('click', function() {
+document.getElementById('logoutBtn').addEventListener('click', function () {
     currentUser = null;
     loginScreen.classList.remove('hidden');
     adminDashboard.classList.add('hidden');
     clientDashboard.classList.add('hidden');
     document.getElementById('loginForm').reset();
-});
-
-// Toggle tema escuro/claro
-let isDarkMode = true;
-themeToggle.addEventListener('click', function() {
-    isDarkMode = !isDarkMode;
-    document.body.className = isDarkMode ? 'min-h-screen transition-all duration-300 dark-mode' : 'min-h-screen transition-all duration-300 light-mode';
-    themeToggle.textContent = isDarkMode ? '🌙 Modo Claro' : '☀️ Modo Escuro';
 });
 
 // Carregar dashboard do admin
@@ -358,7 +356,7 @@ async function updateAdminStats() {
 
     const openTickets = tickets.filter(t => t.status === 'open').length;
     const closedTickets = tickets.filter(t => t.status === 'closed').length;
-    const { data: users, error: userError } = await supabase
+    const { data: users, userError } = await supabase
         .from('users')
         .select('*')
         .eq('type', 'client');
@@ -400,135 +398,15 @@ async function loadAdminTickets() {
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">${formatDateTime(ticket.created_at)}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm">${actions}</td>
         `;
-
         tbody.appendChild(row);
     });
 }
-
-// Carregar dashboard do cliente
-async function loadClientDashboard() {
-    const { data: userTickets, error } = await supabase
-        .from('tickets')
-        .select('*')
-        .eq('user_id', currentUser.id);
-
-    const container = document.getElementById('clientTicketsList');
-    container.innerHTML = '';
-
-    if (userTickets.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-8">Você ainda não possui chamados abertos.</p>';
-        return;
-    }
-
-    userTickets.forEach(ticket => {
-        const statusColor = ticket.status === 'open' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800';
-        const statusText = ticket.status === 'open' ? 'Aberto' : 'Encerrado';
-
-        const ticketCard = document.createElement('div');
-        ticketCard.className = 'border border-gray-200 dark:border-gray-600 rounded-lg p-4 mb-4';
-        ticketCard.innerHTML = `
-            <div class="flex justify-between items-start mb-2">
-                <h4 class="font-semibold text-gray-800 dark:text-white">Protocolo: ${ticket.protocol}</h4>
-                <span class="px-2 py-1 text-xs font-semibold ${statusColor} rounded-full">${statusText}</span>
-            </div>
-            <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>Solicitante:</strong> ${ticket.requester}</p>
-            <p class="text-gray-600 dark:text-gray-300 mb-2"><strong>Descrição:</strong> ${ticket.description}</p>
-            <p class="text-gray-500 dark:text-gray-400 text-sm"><strong>Aberto em:</strong> ${formatDateTime(ticket.created_at)}</p>
-            ${ticket.closed_at ? `<p class="text-gray-500 dark:text-gray-400 text-sm"><strong>Encerrado em:</strong> ${formatDateTime(ticket.closed_at)}</p>` : ''}
-        `;
-        container.appendChild(ticketCard);
-    });
-}
-
-// Ações dos chamados (Admin)
-async function startTicket(ticketId) {
-    const { data, error } = await supabase
-        .from('tickets')
-        .update({ status: 'in_progress' })
-        .eq('id', ticketId);
-
-    if (data) {
-        alert(`Chamado ${ticketId} iniciado!`);
-        loadAdminDashboard();
-    }
-}
-
-async function closeTicket(ticketId) {
-    const { data, error } = await supabase
-        .from('tickets')
-        .update({ status: 'closed', closed_at: new Date() })
-        .eq('id', ticketId);
-
-    if (data) {
-        alert(`Chamado ${ticketId} encerrado!`);
-        loadAdminDashboard();
-    }
-}
-
-async function deleteTicket(ticketId) {
-    if (confirm('Tem certeza que deseja excluir este chamado?')) {
-        const { data, error } = await supabase
-            .from('tickets')
-            .delete()
-            .eq('id', ticketId);
-
-        if (data) {
-            alert('Chamado excluído com sucesso!');
-            loadAdminDashboard();
-        }
-    }
-}
-
-// Modal para novo chamado (Cliente)
-document.getElementById('newTicketBtn').addEventListener('click', function() {
-    document.getElementById('newTicketModal').classList.remove('hidden');
-});
-
-document.getElementById('cancelNewTicket').addEventListener('click', function() {
-    document.getElementById('newTicketModal').classList.add('hidden');
-    document.getElementById('newTicketForm').reset();
-});
-
-document.getElementById('newTicketForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const requesterName = document.getElementById('requesterName').value;
-    const description = document.getElementById('ticketDescription').value;
-
-    const protocol = `TI-${new Date().getFullYear()}-${String(tickets.length + 1).padStart(3, '0')}`;
-
-    const { data: newTicket, error } = await supabase
-        .from('tickets')
-        .insert([
-            {
-                protocol: protocol,
-                requester: requesterName,
-                description: description,
-                status: 'open',
-                user_id: currentUser.id,
-                created_at: new Date()
-            }
-        ])
-        .single();
-
-    if (newTicket) {
-        alert(`Chamado criado com sucesso! Protocolo: ${protocol}`);
-        loadClientDashboard();
-    } else {
-        alert('Erro ao criar chamado');
-    }
-});
 
 // Função auxiliar para formatar data/hora
 function formatDateTime(date) {
     return new Date(date).toLocaleString('pt-BR');
 }
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', function() {
-    // Sistema inicia na tela de login
-    loginScreen.classList.remove('hidden');
-});
-
-    </script>
+   </script>
     </body>
 </html>
